@@ -34,7 +34,9 @@ struct ngx_shm_zone_s {
     void                     *tag;
 };
 
-
+/*
+注意理解cycle,cycle就是周期的意思，对应着一次启动过程。也就是说，不论是新的nginx、reload还是热替换，nginx都会创建一个新的cycle启动对应。
+*/
 struct ngx_cycle_s {
     /*
      保存着所有模块存储配置项的结构体指针，

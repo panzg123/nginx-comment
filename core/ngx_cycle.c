@@ -156,7 +156,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         return NULL;
     }
 
-    //如果原来结构中共享内存，那么直接统计原来共享内存数，否则默认20
+    //如果原来结构中共享内存，那么遍历old_cycle，统计上一次系统中分配了多少块共享内存，接着就按这个数据初始化当前cycle中共享内存的规模;
     if (old_cycle->shared_memory.part.nelts) {
         n = old_cycle->shared_memory.part.nelts;
         for (part = old_cycle->shared_memory.part.next; part; part = part->next)
@@ -164,7 +164,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             n += part->nelts;
         }
 
-    } else {
+    } else {    //否则默认20
         n = 1;
     }
 
@@ -277,14 +277,14 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 #if 0
     log->log_level = NGX_LOG_DEBUG_ALL;
 #endif
-	//panzg:内部解析nginx配置文件
+	//panzg:内部解析nginx配置文件,此处是解析nginx命令行参数"-g"加入的配置
     if (ngx_conf_param(&conf) != NGX_CONF_OK) {
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
         return NULL;
     }
 
-    //第二次调用ngx_conf_parse函数
+    //第二次调用ngx_conf_parse函数，此处才是解析nginx配置文件
 	//开始解析配置文件了，解析配置文件它会一行行读取，然后如果遇到指令
     //则会查找到对应的ngx_command_t对象，然后执行对应的回调set方法。这里所有动作都在ngx_conf_parse这个函数中进行.
     //这函数是立即模块的核心函数，对配置文件边解析边处理

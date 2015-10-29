@@ -12,7 +12,7 @@
 static void *ngx_palloc_block(ngx_pool_t *pool, size_t size);
 static void *ngx_palloc_large(ngx_pool_t *pool, size_t size);
 
-//创建内存池
+//通过ngx_create_pool可以创建一个内存池
 ngx_pool_t *
 ngx_create_pool(size_t size, ngx_log_t *log)
 {
@@ -28,6 +28,7 @@ ngx_create_pool(size_t size, ngx_log_t *log)
     p->d.next = NULL;
     p->d.failed = 0;
 
+	//sizeof(ngx_pool_t)用来存储自身
     size = size - sizeof(ngx_pool_t);
     p->max = (size < NGX_MAX_ALLOC_FROM_POOL) ? size : NGX_MAX_ALLOC_FROM_POOL; //最大不超过 NGX_MAX_ALLOC_FROM_POOL,也就是getpagesize()-1 大小
 
@@ -112,7 +113,7 @@ ngx_reset_pool(ngx_pool_t *pool)
     }
 }
 
-
+//ngx_palloc相对ngx_pnalloc，其会将申请的内存大小向上扩增到NGX_ALIGNMENT的倍数，以方便内存对齐，减少内存访问次数。
 void *
 ngx_palloc(ngx_pool_t *pool, size_t size)
 {
@@ -296,7 +297,7 @@ ngx_pfree(ngx_pool_t *pool, void *p)
     return NGX_DECLINED;
 }
 
-
+//ngx_pcalloc其只是ngx_palloc的一个封装，将申请到的内存全部初始化为0。
 void *
 ngx_pcalloc(ngx_pool_t *pool, size_t size)
 {
@@ -304,13 +305,13 @@ ngx_pcalloc(ngx_pool_t *pool, size_t size)
 
     p = ngx_palloc(pool, size);
     if (p) {
-        ngx_memzero(p, size);
+        ngx_memzero(p, size);  //初始化
     }
 
     return p;
 }
 
-//注册cleanup回叫函数（结构体）
+//注册cleanup回调函数（结构体），以便用来释放自己申请的其他相关资源。
 ngx_pool_cleanup_t *
 ngx_pool_cleanup_add(ngx_pool_t *p, size_t size)
 {
