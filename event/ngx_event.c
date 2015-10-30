@@ -35,13 +35,13 @@ static void *ngx_event_create_conf(ngx_cycle_t *cycle);
 static char *ngx_event_init_conf(ngx_cycle_t *cycle, void *conf);
 
 
-static ngx_uint_t     ngx_timer_resolution;
+static ngx_uint_t     ngx_timer_resolution; /*[p] nginx更新时间间隔，在解析nginx配置时，在event模块初始化过程中对其赋值*/
 sig_atomic_t          ngx_event_timer_alarm;
 
 static ngx_uint_t     ngx_event_max_module;
 
 ngx_uint_t            ngx_event_flags;
-ngx_event_actions_t   ngx_event_actions;
+ngx_event_actions_t   ngx_event_actions; /*[p]ngx_event_actions为nginx程序的IO模型接口函数结构体，封装了selet,poll,epoll等事件驱动模型*/
 
 
 static ngx_atomic_t   connection_counter = 1;
@@ -163,7 +163,7 @@ static ngx_command_t  ngx_event_core_commands[] = {
     { ngx_string("debug_connection"),
       NGX_EVENT_CONF|NGX_CONF_TAKE1,
       ngx_event_debug_connection,
-      0,
+      0,  
       0,
       NULL },
 
@@ -450,7 +450,7 @@ ngx_event_module_init(ngx_cycle_t *cycle)
     }
     // 获取ngx_core_module模块的配置
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
-    // 设置时间精度
+    //[p] 设置时间精度，对ngx_timer_resolution进行赋值
     ngx_timer_resolution = ccf->timer_resolution;
 
 #if !(NGX_WIN32)

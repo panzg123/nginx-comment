@@ -333,7 +333,7 @@ ngx_signal_handler(int signo)
             break;
         }
     }
-
+	//[p]整个nginx源码中，仅此一处调用ngx_time_sigsafe_update函数，因此调用时间更新函数的频率很低
     ngx_time_sigsafe_update();
 
     action = "";
