@@ -81,7 +81,7 @@ ngx_signal_t  signals[] = {
     { 0, NULL, "", NULL }
 };
 
-
+/*[p] master进程通过调用ngx_spwan_process创建工作进程，其中proc指针指向工作进程要执行的具体函数*/
 ngx_pid_t
 ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
     char *name, ngx_int_t respawn)

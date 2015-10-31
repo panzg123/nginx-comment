@@ -224,9 +224,9 @@ ngx_add_channel_event(ngx_cycle_t *cycle, ngx_fd_t fd, ngx_int_t event,
     rev->channel = 1;
     wev->channel = 1;
 
-    ev = (event == NGX_READ_EVENT) ? rev : wev;
-
-    ev->handler = handler;
+    ev = (event == NGX_READ_EVENT) ? rev : wev; //[p] 初始化监听任务
+	 
+    ev->handler = handler; //[p] 设置事件处理函数
 
     if (ngx_add_conn && (ngx_event_flags & NGX_USE_EPOLL_EVENT) == 0) {
         if (ngx_add_conn(c) == NGX_ERROR) {
@@ -235,7 +235,7 @@ ngx_add_channel_event(ngx_cycle_t *cycle, ngx_fd_t fd, ngx_int_t event,
         }
 
     } else {
-        if (ngx_add_event(ev, event, 0) == NGX_ERROR) {
+        if (ngx_add_event(ev, event, 0) == NGX_ERROR) { //[p] 将监听任务添加到任务队列
             ngx_free_connection(c);
             return NGX_ERROR;
         }

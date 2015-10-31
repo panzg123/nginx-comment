@@ -65,7 +65,7 @@ struct ngx_pool_s {
     ngx_log_t            *log;
 };
 
-
+/*ngx_pool_cleanup_t中的*data成员通常指向ngx_pool_cleanup_file_t结构体*/
 typedef struct {
     ngx_fd_t              fd;
     u_char               *name;

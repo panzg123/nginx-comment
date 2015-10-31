@@ -195,7 +195,7 @@ ngx_module_t  ngx_event_core_module = {
     NGX_MODULE_V1_PADDING
 };
 
-
+/*[p] 工作进程事件接收的所有工作都在改函数中完成*/
 void
 ngx_process_events_and_timers(ngx_cycle_t *cycle)
 {
@@ -224,14 +224,14 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
             ngx_accept_disabled--;
 
         } else {
-            if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {
+            if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {  //[p] 尝试获取互斥量
                 return;
             }
 
-            if (ngx_accept_mutex_held) {
+            if (ngx_accept_mutex_held) {    //[p] 获取成功
                 flags |= NGX_POST_EVENTS;  //这个标志是将所有产生的事件放入到一个队列中。等释放锁以后再慢慢来处理事件。
 
-            } else {
+            } else {   //[p] 获取失败
                 if (timer == NGX_TIMER_INFINITE
                     || timer > ngx_accept_mutex_delay)  //设置最长延迟多久，再次去争抢锁
                 {
@@ -242,14 +242,14 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     }
 
     delta = ngx_current_msec;
-    //epoll开始wait事件
+    //调用各种事件驱动机制下的事件处理函数，比如epoll就回调ngx_epoll_process_events
     (void) ngx_process_events(cycle, timer, flags);
 
     delta = ngx_current_msec - delta;
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "timer delta: %M", delta);
-    //ngx_posted_accept_events暂存epoll从监听套接字接口wait到的accept事件
+    //[p] ngx_posted_accept_events暂存epoll从监听套接字接口wait到的accept事件,是个存放事件的队列
     if (ngx_posted_accept_events) {
         ngx_event_process_posted(cycle, &ngx_posted_accept_events);
     }
@@ -264,7 +264,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "posted events %p", ngx_posted_events);
-    //处理普通事件（连接上获得的读写事件）
+    //[p]处理普通事件（连接上获得的读写事件）,非网络请求事件
     if (ngx_posted_events) {
         if (ngx_threaded) {
             ngx_wakeup_worker_thread(cycle);
