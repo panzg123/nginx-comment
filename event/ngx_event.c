@@ -195,7 +195,7 @@ ngx_module_t  ngx_event_core_module = {
     NGX_MODULE_V1_PADDING
 };
 
-/*[p] 工作进程事件接收的所有工作都在改函数中完成*/
+/*[p] 工作进程事件接收的所有工作都在该函数中完成*/
 void
 ngx_process_events_and_timers(ngx_cycle_t *cycle)
 {

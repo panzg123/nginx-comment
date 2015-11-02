@@ -1070,7 +1070,7 @@ ngx_signal_process(ngx_cycle_t *cycle, char *sig)
 
     file.name = ccf->pid;
     file.log = cycle->log;
-
+	//[p] file.name即为配置文件中指定pid所在的文件，该文件存放master的pid。通过配置文件中的pid字段，指明存放进程id文件的地址。
     file.fd = ngx_open_file(file.name.data, NGX_FILE_RDONLY,
                             NGX_FILE_OPEN, NGX_FILE_DEFAULT_ACCESS);
 

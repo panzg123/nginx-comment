@@ -116,7 +116,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
     if (respawn != NGX_PROCESS_DETACHED) {
 
         /* Solaris 9 still has no AF_LOCAL */
-        //创建socketpair，并设置相关属性
+        //[p]创建socketpair，并设置相关属性,用于进程间通信,nginx中使用socket进行进程间通信
         if (socketpair(AF_UNIX, SOCK_STREAM, 0, ngx_processes[s].channel) == -1)
         {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
@@ -130,7 +130,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
                        ngx_processes[s].channel[1]);
         
         //设置非阻塞模式
-        if (ngx_nonblocking(ngx_processes[s].channel[0]) == -1) {
+        if (ngx_nonblocking(ngx_processes[s].channel[0]) == -1) { //[p]设置channel[0]非阻塞,ngx_nonblocking为ioctl系统调用的封装
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           ngx_nonblocking_n " failed while spawning \"%s\"",
                           name);
@@ -138,7 +138,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             return NGX_INVALID_PID;
         }
 
-        if (ngx_nonblocking(ngx_processes[s].channel[1]) == -1) {
+        if (ngx_nonblocking(ngx_processes[s].channel[1]) == -1) { //[p]设置channel[1]非阻塞
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           ngx_nonblocking_n " failed while spawning \"%s\"",
                           name);
@@ -290,7 +290,7 @@ ngx_execute_proc(ngx_cycle_t *cycle, void *data)
     exit(1);
 }
 
-
+//[p]ngx_init_signals方法会初始化signals数组中所有的信号，ngx_init_signals其实是调用了sigaction方法注册信号的回调方法。
 ngx_int_t
 ngx_init_signals(ngx_log_t *log)
 {
@@ -601,7 +601,7 @@ ngx_debug_point(void)
     }
 }
 
-
+/*[p] 信号处理，根据name到ngx_signal_t的名字中去匹配，找到信号，然后通过kill向master发送消息。*/
 ngx_int_t
 ngx_os_signal_process(ngx_cycle_t *cycle, char *name, ngx_int_t pid)
 {
