@@ -10,4 +10,5 @@ nginx-comment
 ##参考
 1. **《nginx高性能web服务器详解》**
 2. **github [jianfengye](https://github.com/jianfengye/nginx-1.0.14_comment)**
-3. **csdn博客 [walkerkalr](http://blog.csdn.net/walkerkalr/article/details/38237147?utm_source=tuicool&utm_medium=referral)**
+3. **walkerkalr的csdn博客 [walkerkalr](http://blog.csdn.net/walkerkalr/article/details/38237147?utm_source=tuicool&utm_medium=referral)**
+4. **chosen0ne的csdn博客 [chosen0ne](http://blog.csdn.net/chosen0ne/article/details/7861048)**
