@@ -801,7 +801,7 @@ ngx_module_t  ngx_http_core_module = {
 
 ngx_str_t  ngx_http_core_get_method = { 3, (u_char *) "GET " };
 
-
+/*不懂*/
 void
 ngx_http_handler(ngx_http_request_t *r)
 {
@@ -810,7 +810,7 @@ ngx_http_handler(ngx_http_request_t *r)
     r->connection->log->action = NULL;
 
     r->connection->unexpected_eof = 0;
-
+	/*[p]初始化 r->phase_handler 不懂*/
     if (!r->internal) {
         switch (r->headers_in.connection_type) {
         case 0:
@@ -840,8 +840,9 @@ ngx_http_handler(ngx_http_request_t *r)
     r->gzip_ok = 0;
     r->gzip_vary = 0;
 #endif
-
+	//[p] 设置request的write_event_handler为ngx_http_core_run_phases
     r->write_event_handler = ngx_http_core_run_phases;
+	//[p]执行
     ngx_http_core_run_phases(r);
 }
 

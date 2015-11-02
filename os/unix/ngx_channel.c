@@ -194,7 +194,7 @@ ngx_read_channel(ngx_socket_t s, ngx_channel_t *ch, size_t size, ngx_log_t *log)
     return n;
 }
 
-//[p] worker进程使用ngx_add_channel_event方法把接受频道消息的套接字添加到epoll中，当接收到父进程消息时子进程会通过epoll的事件回调相应的handler方法来处理这个频道消息。
+//[p] worker进程使用ngx_add_channel_event方法把接受频道消息的套接字添加到epoll中，当接收到父进程消息时子进程会通过epoll的事件回调相应的handler方法来处理这个频道消息
 ngx_int_t
 ngx_add_channel_event(ngx_cycle_t *cycle, ngx_fd_t fd, ngx_int_t event,
     ngx_event_handler_pt handler)
