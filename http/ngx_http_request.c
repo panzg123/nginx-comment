@@ -203,7 +203,8 @@ ngx_http_init_connection(ngx_connection_t *c)
     c->log_error = NGX_ERROR_INFO;
 
     rev = c->read;
-    rev->handler = ngx_http_init_request;//设置读handler
+	//[p]设置读handler为ngx_http_init_request,在客户端向服务器发送数据时会被调用，用于初始化并处理客户端请求
+    rev->handler = ngx_http_init_request;
     c->write->handler = ngx_http_empty_handler;
 
 #if (NGX_STAT_STUB)
