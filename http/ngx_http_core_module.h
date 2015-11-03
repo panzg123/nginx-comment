@@ -210,7 +210,7 @@ typedef struct {
 
     ngx_uint_t                 try_files;       /* unsigned  try_files:1 */
 
-    ngx_http_phase_t           phases[NGX_HTTP_LOG_PHASE + 1];
+    ngx_http_phase_t           phases[NGX_HTTP_LOG_PHASE + 1]; //[p]存放所有的phases,主要用于handle的注册
 } ngx_http_core_main_conf_t;
 
 

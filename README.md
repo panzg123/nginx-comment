@@ -6,6 +6,7 @@ nginx-comment
 2. **update：2015-10-30 注释nginx时间管理相关的函数**
 3. **update：2015-10-31 注释nginx内存池相关的函数**
 4. **update：2015-11-2 注释nginx进程通信**
+5. **update：2015-11-3 注释nginx http request phase**
 
 ##参考
 1. **《nginx高性能web服务器详解》**

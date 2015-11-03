@@ -857,18 +857,18 @@ ngx_http_core_run_phases(ngx_http_request_t *r)
     cmcf = ngx_http_get_module_main_conf(r, ngx_http_core_module);
 
     ph = cmcf->phase_engine.handlers;
-
+	/*[p] 遍历phase上注册的所有handler，这里是以r->phase_handler为索引组成的链表 */
     while (ph[r->phase_handler].checker) {
 
         rc = ph[r->phase_handler].checker(r, &ph[r->phase_handler]);
-
+		/*[p] 如果一个checker返回ok，表示请求处理完毕，则后面的handler不会被调用 */
         if (rc == NGX_OK) {
             return;
         }
     }
 }
 
-
+/*[p] 这个checker用于处理post read和preaccess两个phase。它的作用很简单，就是根据handler的返回值决定继续这个phase的handler的处理，还是调用下一个phase的handler。*/
 ngx_int_t
 ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 {
@@ -883,17 +883,17 @@ ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
                    "generic phase: %ui", r->phase_handler);
 
     rc = ph->handler(r);
-
+	/*[p] phase处理完毕，将r->phase_handler指向下一个phase的第一个handler，返回NGX_AGAIN*/
     if (rc == NGX_OK) {
         r->phase_handler = ph->next;
         return NGX_AGAIN;
     }
-
+	/*[p] 继续处理本phase。handler因为某种原因没有执行，继续执行其他的handler,返回NGX_AGAIN */
     if (rc == NGX_DECLINED) {
         r->phase_handler++;
         return NGX_AGAIN;
     }
-
+	/*[p] 整个请求处理完毕，返回NGX_OK*/
     if (rc == NGX_AGAIN || rc == NGX_DONE) {
         return NGX_OK;
     }
@@ -905,7 +905,8 @@ ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
     return NGX_OK;
 }
 
-
+/*[p]用于处理server rewrite phase和rewrite phase,逻辑很简单就是执行响应的handler，
+因为phase handler执行流程的跳转是在post rewrite中完成的，所以这里只需要将r->phase_handler++顺序遍历其后的handler即可。*/
 ngx_int_t
 ngx_http_core_rewrite_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 {
@@ -915,12 +916,12 @@ ngx_http_core_rewrite_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
                    "rewrite phase: %ui", r->phase_handler);
 
     rc = ph->handler(r);
-
+	/* 继续处理本phase的handler */
     if (rc == NGX_DECLINED) {
         r->phase_handler++;
         return NGX_AGAIN;
     }
-
+	/*请求处理完毕*/
     if (rc == NGX_DONE) {
         return NGX_OK;
     }
@@ -932,7 +933,7 @@ ngx_http_core_rewrite_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
     return NGX_OK;
 }
 
-
+/*[p]这是find config phase的checker，用于根据uri查找对应的location*/
 ngx_int_t
 ngx_http_core_find_config_phase(ngx_http_request_t *r,
     ngx_http_phase_handler_t *ph)
@@ -944,7 +945,7 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
 
     r->content_handler = NULL;
     r->uri_changed = 0;
-
+	/*[p] 根据uri查找location，先静态查找，再正则匹配 */
     rc = ngx_http_core_find_location(r);
 
     if (rc == NGX_ERROR) {
@@ -953,7 +954,7 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
     }
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-
+	/*[p] 非内部请求访问内部location是非法的，所有与error处理类似 */
     if (!r->internal && clcf->internal) {
         ngx_http_finalize_request(r, NGX_HTTP_NOT_FOUND);
         return NGX_OK;
@@ -963,13 +964,13 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
                    "using configuration \"%s%V\"",
                    (clcf->noname ? "*" : (clcf->exact_match ? "=" : "")),
                    &clcf->name);
-
+	/*[p] 根据匹配的location设置request的属性 */
     ngx_http_update_location_config(r);
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "http cl:%O max:%O",
                    r->headers_in.content_length_n, clcf->client_max_body_size);
-
+	/*[p] 判断请求内容大小是否超过限制 */
     if (r->headers_in.content_length_n != -1
         && !r->discard_body
         && clcf->client_max_body_size
@@ -983,7 +984,7 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
         ngx_http_finalize_request(r, NGX_HTTP_REQUEST_ENTITY_TOO_LARGE);
         return NGX_OK;
     }
-
+	/*[p] 处理重定向 */
     if (rc == NGX_DONE) {
         ngx_http_clear_location(r);
 
@@ -1021,12 +1022,20 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
         ngx_http_finalize_request(r, NGX_HTTP_MOVED_PERMANENTLY);
         return NGX_OK;
     }
-
+	/*[p] 执行rewrite phase handler */
     r->phase_handler++;
-    return NGX_AGAIN;
+	return NGX_AGAIN; /*[p] find config的checker可能会被执行多次，当rewrite成功后，会修改uri参数，需要重新匹配location。*/
 }
 
-
+/** http://blog.csdn.net/chosen0ne/article/details/8051940
+*[p]这是post rewrite phase的checker，用于对rewrite和server rewrite phase进行收尾工作。
+*request中有两个字段与重写相关：
+*	uri_changed：uri是否被重写。
+*	uri_changes：uri被重写的次数，初始值为11，所以只能重写10次。
+*server rewrite和rewrite的handler会修改这两个变量，实现重写。
+*这个checker就是根据uri_changed判断是否进入find config phase，然后再根据uri_changes做一些校验。
+*
+*/
 ngx_int_t
 ngx_http_core_post_rewrite_phase(ngx_http_request_t *r,
     ngx_http_phase_handler_t *ph)
@@ -1035,12 +1044,16 @@ ngx_http_core_post_rewrite_phase(ngx_http_request_t *r,
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "post rewrite phase: %ui", r->phase_handler);
-
+	/**[p]
+	* uri_changed标志位表示uri是否有被重写。
+	* 如果没有的话，这里累加r->phase_handler，由于post rewrite只有一个handler，
+	* 所以就会跳到下一个phase继续执行。
+	*/
     if (!r->uri_changed) {
         r->phase_handler++;
         return NGX_AGAIN;
     }
-
+	/*[p] uri被重写 */
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "uri changes: %d", r->uri_changes);
 
@@ -1052,7 +1065,7 @@ ngx_http_core_post_rewrite_phase(ngx_http_request_t *r,
      */
 
     r->uri_changes--;
-
+	/*[p] 校验是否被重写了多次，uri_changes初始值为11，所以最多可以重写10次 */
     if (r->uri_changes == 0) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                       "rewrite or internal redirection cycle "
@@ -1061,22 +1074,26 @@ ngx_http_core_post_rewrite_phase(ngx_http_request_t *r,
         ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
         return NGX_OK;
     }
-
+	/*[p]
+	* 在ngx_http_init_phase_handlers中，如果use_rewrite不为0，那么
+	* post rewrite phase handler的next指向find config的phase handler。
+	* 接下来会进入find config phase
+	*/
     r->phase_handler = ph->next;
-
+	/*[p] server rewrite有可能改变了server config，所以要对r->loc_conf重新赋值 */
     cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
     r->loc_conf = cscf->ctx->loc_conf;
 
     return NGX_AGAIN;
 }
 
-
+//[p]这是access phase的checker,细粒度的access
 ngx_int_t
 ngx_http_core_access_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 {
     ngx_int_t                  rc;
     ngx_http_core_loc_conf_t  *clcf;
-
+	/*[p] 只针对主请求处理 */
     if (r != r->main) {
         r->phase_handler = ph->next;
         return NGX_AGAIN;
@@ -1086,27 +1103,28 @@ ngx_http_core_access_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
                    "access phase: %ui", r->phase_handler);
 
     rc = ph->handler(r);
-
+	/*[p] 跳到本phase的下一个handler */
     if (rc == NGX_DECLINED) {
         r->phase_handler++;
         return NGX_AGAIN;
     }
-
+	/*[p] 请求处理完毕 */
     if (rc == NGX_AGAIN || rc == NGX_DONE) {
         return NGX_OK;
     }
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-
+	/*[p] 相当于satisfy all，就是必须满足所有条件，所以继续执行access handler */
     if (clcf->satisfy == NGX_HTTP_SATISFY_ALL) {
 
         if (rc == NGX_OK) {
             r->phase_handler++;
             return NGX_AGAIN;
         }
-
+	/*[p] 否则只要满足任意一个条件即可，所以执行下一个phase的第一个handler */
     } else {
         if (rc == NGX_OK) {
+			/*[p] 对access_code清零，后面post access phase根据这个属性处理 */
             r->access_code = 0;
 
             if (r->headers_out.www_authenticate) {
@@ -1118,6 +1136,7 @@ ngx_http_core_access_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
         }
 
         if (rc == NGX_HTTP_FORBIDDEN || rc == NGX_HTTP_UNAUTHORIZED) {
+			/*[p] 设置access_code，如果多个handler校验不通过，则只记录最后一个*/
             r->access_code = rc;
 
             r->phase_handler++;
@@ -1125,13 +1144,13 @@ ngx_http_core_access_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
         }
     }
 
-    /* rc == NGX_ERROR || rc == NGX_HTTP_...  */
+    /*[p] rc == NGX_ERROR || rc == NGX_HTTP_...  */
 
     ngx_http_finalize_request(r, rc);
     return NGX_OK;
 }
 
-
+//[p] 这个是post access phase的checker，用于对access phase做收尾处理
 ngx_int_t
 ngx_http_core_post_access_phase(ngx_http_request_t *r,
     ngx_http_phase_handler_t *ph)
@@ -1142,7 +1161,7 @@ ngx_http_core_post_access_phase(ngx_http_request_t *r,
                    "post access phase: %ui", r->phase_handler);
 
     access_code = r->access_code;
-
+	/*[p] 设置了access_code，说明没有权限，则终结请求 */
     if (access_code) {
         if (access_code == NGX_HTTP_FORBIDDEN) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -1153,7 +1172,7 @@ ngx_http_core_post_access_phase(ngx_http_request_t *r,
         ngx_http_finalize_request(r, access_code);
         return NGX_OK;
     }
-
+	/*[p] 否则，跳到下一个handler */
     r->phase_handler++;
     return NGX_AGAIN;
 }
@@ -1354,7 +1373,7 @@ ngx_http_core_try_files_phase(ngx_http_request_t *r,
     /* not reached */
 }
 
-
+/*[p] 这个checker处理content phase，也就是用于生成响应内容的，我们编写的模块大部分是在这个phase执行的*/
 ngx_int_t
 ngx_http_core_content_phase(ngx_http_request_t *r,
     ngx_http_phase_handler_t *ph)
@@ -1362,7 +1381,11 @@ ngx_http_core_content_phase(ngx_http_request_t *r,
     size_t     root;
     ngx_int_t  rc;
     ngx_str_t  path;
-
+	/*[p]
+	* 在find config phase中如果匹配到的location具有handler，则会赋值给r->content_handler。
+	* 而这里可以看到，如果r->content_handler存在则只会执行这一个handler，然后返回。
+	* 也就是说如果location设置了handler，则只会执行这一个content handler，不会执行其他的。
+	*/
     if (r->content_handler) {
         r->write_event_handler = ngx_http_request_empty_handler;
         ngx_http_finalize_request(r, r->content_handler(r));
@@ -1382,7 +1405,7 @@ ngx_http_core_content_phase(ngx_http_request_t *r,
     /* rc == NGX_DECLINED */
 
     ph++;
-
+	/*[p] 如果下一个handler的checker存在，则返回NGX_AGAIN，继续调用下一个handler */
     if (ph->checker) {
         r->phase_handler++;
         return NGX_AGAIN;
