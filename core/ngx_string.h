@@ -141,7 +141,7 @@ void *ngx_memcpy(void *dst, void *src, size_t n);
  * icc8 compile memcpy(d, s, 4) to the inline "mov"es or XMM moves.
  */
 #define ngx_memcpy(dst, src, n)   (void) memcpy(dst, src, n)
-#define ngx_cpymem(dst, src, n)   (((u_char *) memcpy(dst, src, n)) + (n))
+#define ngx_cpymem(dst, src, n)   (((u_char *) memcpy(dst, src, n)) + (n)) //[p]返回的是拷贝数据的终点，在连续拷贝多端数据时很方便
 
 #endif
 
