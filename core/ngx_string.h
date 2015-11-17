@@ -23,8 +23,8 @@ typedef struct {
 
 
 typedef struct {
-    ngx_str_t   key;  //key-value结构
-    ngx_str_t   value; //key-value结构
+    ngx_str_t   key;  //[p]key-value结构,键
+    ngx_str_t   value; //[p]key-value结构，值
 } ngx_keyval_t;
 
 //参考资料：

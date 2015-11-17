@@ -124,14 +124,14 @@ struct ngx_cycle_s {
     // 使用gethostname系统调用得到的主机名
     ngx_str_t                 hostname;   
 };
-
+//[p] 保存nginx运行所需的基本参数
 typedef struct {
-     ngx_flag_t               daemon;              
-     ngx_flag_t               master;
+     ngx_flag_t               daemon;  //[p] 守护进程标志            
+     ngx_flag_t               master;  //[p] master进程标志
 
      ngx_msec_t               timer_resolution;
 
-     ngx_int_t                worker_processes;    
+     ngx_int_t                worker_processes;    //[p] worker进程的数量
      ngx_int_t                debug_points;
 
      ngx_int_t                rlimit_nofile;

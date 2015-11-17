@@ -100,9 +100,9 @@ struct ngx_chain_s {
 
 
 typedef struct {
-    ngx_int_t    num;
-    size_t       size;
-} ngx_bufs_t;
+    ngx_int_t    num;   //[p]缓冲区的数量
+    size_t       size;  //[p]缓冲区的大小
+} ngx_bufs_t; //[p]创建链表的参数结构，用于一次创建多个缓冲区
 
 
 typedef struct ngx_output_chain_ctx_s  ngx_output_chain_ctx_t;
@@ -182,6 +182,7 @@ ngx_chain_t *ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs);
 #define ngx_calloc_buf(pool) ngx_pcalloc(pool, sizeof(ngx_buf_t))
 
 ngx_chain_t *ngx_alloc_chain_link(ngx_pool_t *pool);
+//[p]从内存池中释放ngx_chinat_t对象
 #define ngx_free_chain(pool, cl)                                             \
     cl->next = pool->chain;                                                  \
     pool->chain = cl
