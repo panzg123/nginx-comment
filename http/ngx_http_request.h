@@ -375,11 +375,11 @@ struct ngx_http_posted_request_s {
     ngx_http_posted_request_t        *next;
 };
 
-
+//[p] 处理函数原型，任何handler模块要想处理HTTP请求都必须实现这个函数
 typedef ngx_int_t (*ngx_http_handler_pt)(ngx_http_request_t *r);
 typedef void (*ngx_http_event_handler_pt)(ngx_http_request_t *r);
 
-//这个结构定义了一个HTTP请求。
+//[p] 这个结构定义了一个HTTP请求,该结构贯穿了http请求的整个过程，可以说http请求就是操作ngx_http_request_t数据结构
 struct ngx_http_request_s {
     uint32_t                          signature;         /* "HTTP" */
 
