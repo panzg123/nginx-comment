@@ -314,9 +314,9 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
 
 static ngx_int_t
-ngx_http_write_filter_init(ngx_conf_t *cf)
+ngx_http_write_filter_init(ngx_conf_t *cf)  //[p] postconfiguration 阶段调用
 {
-    ngx_http_top_body_filter = ngx_http_write_filter;
+    ngx_http_top_body_filter = ngx_http_write_filter; //[p] 初始化链表头结点
 
     return NGX_OK;
 }

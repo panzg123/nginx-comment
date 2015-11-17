@@ -19,7 +19,7 @@
 #define NGX_HTTP_DISCARD_BUFFER_SIZE       4096
 #define NGX_HTTP_LINGERING_BUFFER_SIZE     4096
 
-
+//[p]HTTP协议版本号
 #define NGX_HTTP_VERSION_9                 9
 #define NGX_HTTP_VERSION_10                1000
 #define NGX_HTTP_VERSION_11                1001
@@ -63,20 +63,20 @@
 #define NGX_HTTP_SUBREQUEST_WAITED         4
 #define NGX_HTTP_LOG_UNSAFE                8
 
-
+//[p]2XX状态码
 #define NGX_HTTP_OK                        200
 #define NGX_HTTP_CREATED                   201
 #define NGX_HTTP_ACCEPTED                  202
 #define NGX_HTTP_NO_CONTENT                204
 #define NGX_HTTP_PARTIAL_CONTENT           206
-
+//[p]3XX状态码
 #define NGX_HTTP_SPECIAL_RESPONSE          300
 #define NGX_HTTP_MOVED_PERMANENTLY         301
 #define NGX_HTTP_MOVED_TEMPORARILY         302
 #define NGX_HTTP_SEE_OTHER                 303
 #define NGX_HTTP_NOT_MODIFIED              304
 #define NGX_HTTP_TEMPORARY_REDIRECT        307
-
+//[p]4XX状态码
 #define NGX_HTTP_BAD_REQUEST               400
 #define NGX_HTTP_UNAUTHORIZED              401
 #define NGX_HTTP_FORBIDDEN                 403
@@ -164,12 +164,12 @@ typedef struct {
     ngx_uint_t                        offset;
 } ngx_http_header_out_t;
 
-
+//[p]请求头结构体
 typedef struct {
-    ngx_list_t                        headers;
+    ngx_list_t                        headers;//[p]头信息链表
 
-    ngx_table_elt_t                  *host;
-    ngx_table_elt_t                  *connection;
+    ngx_table_elt_t                  *host;//[p]host头
+    ngx_table_elt_t                  *connection;//[p]connection头
     ngx_table_elt_t                  *if_modified_since;
     ngx_table_elt_t                  *if_unmodified_since;
     ngx_table_elt_t                  *user_agent;
@@ -232,7 +232,7 @@ typedef struct {
 } ngx_http_headers_in_t;
 
 
-//ngx_http_headers_out_t 代表输出的相应头
+//ngx_http_headers_out_t 响应头
 typedef struct {
     //待发送的HTTP头部链表。
     ngx_list_t                        headers;
@@ -267,7 +267,7 @@ typedef struct {
     ngx_array_t                       cache_control;
 
     //这里指定过content_length_n后，不用再到ngx_table_elt_t中设置了
-    off_t                             content_length_n;
+    off_t                             content_length_n; //[p]响应数据长度
     time_t                            date_time;
     time_t                            last_modified_time;
 } ngx_http_headers_out_t;
@@ -379,7 +379,7 @@ struct ngx_http_posted_request_s {
 typedef ngx_int_t (*ngx_http_handler_pt)(ngx_http_request_t *r);
 typedef void (*ngx_http_event_handler_pt)(ngx_http_request_t *r);
 
-//[p] 这个结构定义了一个HTTP请求,该结构贯穿了http请求的整个过程，可以说http请求就是操作ngx_http_request_t数据结构
+//[p] 这个结构定义了一个HTTP请求,该结构贯穿了http请求的整个过程，可以说处理http请求就是操作ngx_http_request_t数据结构
 struct ngx_http_request_s {
     uint32_t                          signature;         /* "HTTP" */
 
@@ -452,17 +452,17 @@ struct ngx_http_request_s {
     // 与start_sec配合使用，表示相对于start_sec秒的毫秒偏移量
     ngx_msec_t                        start_msec;
 
-    ngx_uint_t                        method;
+    ngx_uint_t                        method;//[p]请求方法
     ngx_uint_t                        http_version; //http的版本
 
-    ngx_str_t                         request_line;
+    ngx_str_t                         request_line;//[p]存储完整的请求行字符串
     ngx_str_t                         uri;  //请求的路径 eg '/query.php'
     ngx_str_t                         args; //请求的参数 eg 'name=john'
-    ngx_str_t                         exten; 
-    ngx_str_t                         unparsed_uri;
+    ngx_str_t                         exten; //[p]请求的拓展名
+    ngx_str_t                         unparsed_uri;//[p]未解析的原始URI
 
-    ngx_str_t                         method_name;
-    ngx_str_t                         http_protocol;
+    ngx_str_t                         method_name;//[p]请求方法名
+    ngx_str_t                         http_protocol;//[p]HTTP协议版本字符串
 
     /*
     表示需要发送给客户端的HTTP相应。out中保存着由headers_out中序列化后的表示HTTP头部的TCP流。在调用ngx_http_output_filter方法后，

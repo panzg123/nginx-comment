@@ -1880,16 +1880,16 @@ ngx_http_send_response(ngx_http_request_t *r, ngx_uint_t status,
     return ngx_http_output_filter(r, &out);
 }
 
-
+//[p] 发送响应头
 ngx_int_t
 ngx_http_send_header(ngx_http_request_t *r)
 {
-    if (r->err_status) {
+    if (r->err_status) { //[p]检查请求的错误代码
         r->headers_out.status = r->err_status;
         r->headers_out.status_line.len = 0;
     }
 
-    return ngx_http_top_header_filter(r);
+    return ngx_http_top_header_filter(r); //[p]启动过滤链表
 }
 
 //r是request请求，in是输入的chain
@@ -1904,7 +1904,7 @@ ngx_http_output_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http output filter \"%V?%V\"", &r->uri, &r->args);
 
-    rc = ngx_http_top_body_filter(r, in);
+    rc = ngx_http_top_body_filter(r, in); //[p]启动过滤链表
 
     if (rc == NGX_ERROR) {
         /* NGX_ERROR may be returned by any filter */

@@ -3059,8 +3059,8 @@ ngx_http_log_request(ngx_http_request_t *r)
     log_handler = cmcf->phases[NGX_HTTP_LOG_PHASE].handlers.elts;
     n = cmcf->phases[NGX_HTTP_LOG_PHASE].handlers.nelts;
 
-    for (i = 0; i < n; i++) {
-        log_handler[i](r);
+    for (i = 0; i < n; i++) { //[p]遍历log handler数组
+        log_handler[i](r); //[p] 执行回调函数
     }
 }
 
