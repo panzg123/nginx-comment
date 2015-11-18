@@ -166,7 +166,7 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
             hash = (hash * 113 + iphp->addr[i]) % 6271;
         }
 
-        p = hash % iphp->rrp.peers->number;
+        p = hash % iphp->rrp.peers->number;						//[p]算法计算散列值
 
         n = p / (8 * sizeof(uintptr_t));
         m = (uintptr_t) 1 << p % (8 * sizeof(uintptr_t));

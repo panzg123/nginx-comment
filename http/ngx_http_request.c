@@ -1844,7 +1844,7 @@ ngx_http_request_handler(ngx_event_t *ev)
     ngx_http_run_posted_requests(c);
 }
 
-
+//[p]驱动子请求运行
 void
 ngx_http_run_posted_requests(ngx_connection_t *c)
 {
@@ -1859,15 +1859,15 @@ ngx_http_run_posted_requests(ngx_connection_t *c)
         }
 
         r = c->data;
-        pr = r->main->posted_requests;
+        pr = r->main->posted_requests;         //[p]获取待执行的请求链表
 
         if (pr == NULL) {
             return;
         }
 
-        r->main->posted_requests = pr->next;
+        r->main->posted_requests = pr->next;	//[p]移除头结点
 
-        r = pr->request;
+        r = pr->request;					//[p]得到当前待执行的请求
 
         ctx = c->log->data;
         ctx->current_request = r;
@@ -1875,11 +1875,11 @@ ngx_http_run_posted_requests(ngx_connection_t *c)
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                        "http posted request: \"%V?%V\"", &r->uri, &r->args);
 
-        r->write_event_handler(r);
+        r->write_event_handler(r);			//[p]执行请求的handler
     }
 }
 
-
+//[p]该函数的作用是将子请求pr加入到主请求r的待执行请求链表posted_requests里
 ngx_int_t
 ngx_http_post_request(ngx_http_request_t *r, ngx_http_posted_request_t *pr)
 {
@@ -1895,9 +1895,9 @@ ngx_http_post_request(ngx_http_request_t *r, ngx_http_posted_request_t *pr)
     pr->request = r;
     pr->next = NULL;
 
-    for (p = &r->main->posted_requests; *p; p = &(*p)->next) { /* void */ }
+    for (p = &r->main->posted_requests; *p; p = &(*p)->next) { /* void */ } //[p]找到链表末尾
 
-    *p = pr;
+    *p = pr;  //[p]添加到链表末尾等待调度
 
     return NGX_OK;
 }

@@ -831,7 +831,7 @@ ngx_http_handler(ngx_http_request_t *r)
 
     } else {
         cmcf = ngx_http_get_module_main_conf(r, ngx_http_core_module);
-        r->phase_handler = cmcf->phase_engine.server_rewrite_index;
+        r->phase_handler = cmcf->phase_engine.server_rewrite_index;		//[p]设置阶段起点
     }
 
     r->valid_location = 1;
@@ -842,7 +842,7 @@ ngx_http_handler(ngx_http_request_t *r)
 #endif
 	//[p] 设置request的write_event_handler为ngx_http_core_run_phases
     r->write_event_handler = ngx_http_core_run_phases;
-	//[p]执行
+	//[p]执行处理引擎
     ngx_http_core_run_phases(r);
 }
 
@@ -2357,7 +2357,13 @@ ngx_http_gzip_quantity(u_char *p, u_char *last)
 
 #endif
 
-
+//[p]创建子请求
+//r:当前的请求对象，即父请求
+//uri:子请求的uri，也就是本server块内的某个location的名字
+//args:子请求的uri参数，可以为空
+//sr:输出参数，传出创建好的子请求对象
+//psr:子请求结束时的回调函数
+//flags:标志位，定制子请求的某些行为
 ngx_int_t
 ngx_http_subrequest(ngx_http_request_t *r,
     ngx_str_t *uri, ngx_str_t *args, ngx_http_request_t **psr,
@@ -2369,16 +2375,16 @@ ngx_http_subrequest(ngx_http_request_t *r,
     ngx_http_core_srv_conf_t      *cscf;
     ngx_http_postponed_request_t  *pr, *p;
 
-    r->main->subrequests--;
+    r->main->subrequests--;												//[p]主请求里的子请求计数器
 
-    if (r->main->subrequests == 0) {
+    if (r->main->subrequests == 0) {									//[p]子请求数目达到上限
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                       "subrequests cycle while processing \"%V\"", uri);
-        r->main->subrequests = 1;
+        r->main->subrequests = 1;										//[p]子请求创建失败，返回错误
         return NGX_ERROR;
     }
 
-    sr = ngx_pcalloc(r->pool, sizeof(ngx_http_request_t));
+    sr = ngx_pcalloc(r->pool, sizeof(ngx_http_request_t));				//[p]创建子请求对象
     if (sr == NULL) {
         return NGX_ERROR;
     }
@@ -2388,7 +2394,7 @@ ngx_http_subrequest(ngx_http_request_t *r,
     c = r->connection;
     sr->connection = c;
 
-    sr->ctx = ngx_pcalloc(r->pool, sizeof(void *) * ngx_http_max_module);
+    sr->ctx = ngx_pcalloc(r->pool, sizeof(void *) * ngx_http_max_module);//[p]创建模块的ctx存储空间
     if (sr->ctx == NULL) {
         return NGX_ERROR;
     }
@@ -2401,25 +2407,25 @@ ngx_http_subrequest(ngx_http_request_t *r,
     }
 
     cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
-    sr->main_conf = cscf->ctx->main_conf;
+    sr->main_conf = cscf->ctx->main_conf;								//[p]模块的各层次配置数据
     sr->srv_conf = cscf->ctx->srv_conf;
     sr->loc_conf = cscf->ctx->loc_conf;
 
-    sr->pool = r->pool;
+    sr->pool = r->pool;						//[p]复用父请求的内存池
 
-    sr->headers_in = r->headers_in;
+    sr->headers_in = r->headers_in;			//[p]复用父请求的请求头
 
-    ngx_http_clear_content_length(sr);
+    ngx_http_clear_content_length(sr);		
     ngx_http_clear_accept_ranges(sr);
     ngx_http_clear_last_modified(sr);
 
-    sr->request_body = r->request_body;
+    sr->request_body = r->request_body;		//[p]复用父请求的请求体
 
-    sr->method = NGX_HTTP_GET;
-    sr->http_version = r->http_version;
+    sr->method = NGX_HTTP_GET;				//[p]请求方法默认为GET
+    sr->http_version = r->http_version;		//[p]拷贝HTTP版本信息
 
-    sr->request_line = r->request_line;
-    sr->uri = *uri;
+    sr->request_line = r->request_line;		//[p]复用原请求行
+    sr->uri = *uri;							//[p]改写子请求的URI
 
     if (args) {
         sr->args = *args;
@@ -2427,21 +2433,21 @@ ngx_http_subrequest(ngx_http_request_t *r,
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http subrequest \"%V?%V\"", uri, &sr->args);
-
+	//[p]设置子请求的标志位
     sr->subrequest_in_memory = (flags & NGX_HTTP_SUBREQUEST_IN_MEMORY) != 0;
     sr->waited = (flags & NGX_HTTP_SUBREQUEST_WAITED) != 0;
 
-    sr->unparsed_uri = r->unparsed_uri;
-    sr->method_name = ngx_http_core_get_method;
-    sr->http_protocol = r->http_protocol;
+    sr->unparsed_uri = r->unparsed_uri;				//[p]复用原始URI
+    sr->method_name = ngx_http_core_get_method;		//[p]请求方法默认为GET
+    sr->http_protocol = r->http_protocol;			//[p]复用原请求协议
 
-    ngx_http_set_exten(sr);
+    ngx_http_set_exten(sr);							//[p]改写自请求的拓展名
 
-    sr->main = r->main;
-    sr->parent = r;
-    sr->post_subrequest = ps;
+    sr->main = r->main;								//[p]设置主请求
+    sr->parent = r;									//[p]设置父请求
+    sr->post_subrequest = ps;						//[p]子请求结束后的回调函数
     sr->read_event_handler = ngx_http_request_empty_handler;
-    sr->write_event_handler = ngx_http_handler;
+    sr->write_event_handler = ngx_http_handler;		//[p]设置子请求的处理函数为Ngx_http_handler
 
     if (c->data == r && r->postponed == NULL) {
         c->data = sr;
@@ -2451,7 +2457,7 @@ ngx_http_subrequest(ngx_http_request_t *r,
 
     sr->log_handler = r->log_handler;
 
-    pr = ngx_palloc(r->pool, sizeof(ngx_http_postponed_request_t));
+    pr = ngx_palloc(r->pool, sizeof(ngx_http_postponed_request_t));//[p]子请求的数据对象
     if (pr == NULL) {
         return NGX_ERROR;
     }
@@ -2460,15 +2466,15 @@ ngx_http_subrequest(ngx_http_request_t *r,
     pr->out = NULL;
     pr->next = NULL;
 
-    if (r->postponed) {
+    if (r->postponed) {		//[p]挂载到父请求的数据链表的末尾
         for (p = r->postponed; p->next; p = p->next) { /* void */ }
         p->next = pr;
 
-    } else {
+    } else {				//[p]空链表则直接添加
         r->postponed = pr;
     }
 
-    sr->internal = 1;
+    sr->internal = 1;		
 
     sr->discard_body = r->discard_body;
     sr->expect_tested = 1;
@@ -2483,9 +2489,9 @@ ngx_http_subrequest(ngx_http_request_t *r,
     r->main->subrequests++;
     r->main->count++;
 
-    *psr = sr;
+    *psr = sr;			//[p]创建结束，返回子请求对象
 
-    return ngx_http_post_request(sr, NULL);
+    return ngx_http_post_request(sr, NULL);//[p]加入待执行请求链表
 }
 
 
