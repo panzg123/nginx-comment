@@ -57,7 +57,7 @@ typedef struct {
 //设置字符串str为空串，长度为0，data为NULL。
 #define ngx_str_null(str)   (str)->len = 0; (str)->data = NULL
 
-/*
+/*[p]
 ngx_string与ngx_null_string只能用于赋值时初始化
 ngx_str_t str = ngx_string("hello world");
 ngx_str_t str1 = ngx_null_string();
@@ -238,7 +238,7 @@ u_char *ngx_hex_dump(u_char *dst, u_char *src, size_t len);
 //base64 编码／解码函数和宏
 #define ngx_base64_encoded_length(len)  (((len + 2) / 3) * 4)
 #define ngx_base64_decoded_length(len)  (((len + 3) / 4) * 3)
-
+//[p]标准base64的编解码
 void ngx_encode_base64(ngx_str_t *dst, ngx_str_t *src);
 ngx_int_t ngx_decode_base64(ngx_str_t *dst, ngx_str_t *src);
 /*

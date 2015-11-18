@@ -365,7 +365,7 @@ ngx_http_upstream_create_round_robin_peer(ngx_http_request_t *r,
     return NGX_OK;
 }
 
-//[p]该函数为IP散列算法的具体实现，根据地址计算散列值，然后从列表中选择一个地址
+
 ngx_int_t
 ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
 {
