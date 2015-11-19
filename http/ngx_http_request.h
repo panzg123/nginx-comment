@@ -164,10 +164,11 @@ typedef struct {
     ngx_uint_t                        offset;
 } ngx_http_header_out_t;
 
-//[p]请求头结构体
+//[p]该结构体存储已经解析的HTTP头部
 typedef struct {
-    ngx_list_t                        headers;//[p]头信息链表
-
+	/*[p]所有解析过的HTTP头部都在headers链表中，这个链表所有元素都是ngx_table_elt_t成员*/
+    ngx_list_t                        headers;
+	/*[p]以下每个ngx_table_elt_t成员都是RFC1616规范定义的HTTP头部，它们实际上指向headers链表中的成员，注意，当他们为空时，表示没有解析到相应的HTTP头部*/
     ngx_table_elt_t                  *host;//[p]host头
     ngx_table_elt_t                  *connection;//[p]connection头
     ngx_table_elt_t                  *if_modified_since;
