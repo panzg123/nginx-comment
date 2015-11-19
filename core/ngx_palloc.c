@@ -363,7 +363,7 @@ ngx_pool_run_cleanup_file(ngx_pool_t *p, ngx_fd_t fd)
     }
 }
 
-
+//[p]关闭文件句柄
 void
 ngx_pool_cleanup_file(void *data)
 {

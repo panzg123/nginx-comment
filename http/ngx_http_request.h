@@ -238,8 +238,8 @@ typedef struct {
     //待发送的HTTP头部链表。
     ngx_list_t                        headers;
 
-    ngx_uint_t                        status; //http相应状态，比如200
-    ngx_str_t                         status_line; //相应的状态行，比如“HTTP/1.1 201 CREATED”
+    ngx_uint_t                        status; //http响应状态，比如200
+    ngx_str_t                         status_line; //响应的状态行，比如“HTTP/1.1 201 CREATED”
 
     //下面成员都是RFC1616中定义的HTTP头部。
     ngx_table_elt_t                  *server;
@@ -265,7 +265,7 @@ typedef struct {
     u_char                           *content_type_lowcase;
     ngx_uint_t                        content_type_hash;
 
-    ngx_array_t                       cache_control;
+    ngx_array_t                       cache_control;  
 
     //这里指定过content_length_n后，不用再到ngx_table_elt_t中设置了
     off_t                             content_length_n; //[p]响应数据长度

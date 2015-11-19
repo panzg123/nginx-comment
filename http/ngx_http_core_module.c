@@ -1892,7 +1892,7 @@ ngx_http_send_header(ngx_http_request_t *r)
     return ngx_http_top_header_filter(r); //[p]启动过滤链表
 }
 
-//r是request请求，in是输入的chain
+//向客户端发送响应包体，r是request请求，in是输入的chain
 ngx_int_t
 ngx_http_output_filter(ngx_http_request_t *r, ngx_chain_t *in)
 {
