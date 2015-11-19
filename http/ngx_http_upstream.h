@@ -322,7 +322,7 @@ struct ngx_http_upstream_s {
     unsigned                         store:1;
     unsigned                         cacheable:1;
     unsigned                         accel:1;
-    // 是否给予SSL协议访问上游服务器
+    // 是否基于SSL协议访问上游服务器
     unsigned                         ssl:1;
 #if (NGX_HTTP_CACHE)
     unsigned                         cache_status:3;
