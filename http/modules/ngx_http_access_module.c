@@ -7,8 +7,8 @@
 
  
  /*
- * ¸ÃÄ£¿éÌá¹©¶ÔÓÚÌØ¶¨hostµÄ¿Í»§¶Ë·ÃÎÊ¿ØÖÆ¡£
- * ¿ÉÒÔÏŞ¶¨ÌØ¶¨hostµÄ¿Í»§¶Ë¶ÔÓÚ·şÎñÆ÷¶ËÈ«²¿»òÕßÃş¸öserver»òÕßÄ³¸ölocation·ÃÎÊ¡£
+ * è¯¥æ¨¡å—æä¾›å¯¹äºç‰¹å®šhostçš„å®¢æˆ·ç«¯è®¿é—®æ§åˆ¶ã€‚
+ * å¯ä»¥é™å®šç‰¹å®šhostçš„å®¢æˆ·ç«¯å¯¹äºæœåŠ¡å™¨ç«¯å…¨éƒ¨æˆ–è€…æ‘¸ä¸ªserveræˆ–è€…æŸä¸ªlocationè®¿é—®ã€‚
  */
 #include <ngx_config.h>
 #include <ngx_core.h>
@@ -38,9 +38,9 @@ typedef struct {
 #endif
 } ngx_http_access_loc_conf_t;
 
-//¸ÃÄ£¿éµÄÖ÷´¦Àíº¯Êı¡£
-//¸ù¾İ¿Í»§¶ËµØÖ·µÄÀàĞÍ£¬Ñ¡Ôñµ÷ÓÃngx_http_access_inetÀ´´¦Àíipv4¡£
-//»¹ÊÇÑ¡Ôñµ÷ÓÃngx_http_access_inet6À´´¦Àíipv6¡£
+//è¯¥æ¨¡å—çš„ä¸»å¤„ç†å‡½æ•°ã€‚
+//æ ¹æ®å®¢æˆ·ç«¯åœ°å€çš„ç±»å‹ï¼Œé€‰æ‹©è°ƒç”¨ngx_http_access_inetæ¥å¤„ç†ipv4ã€‚
+//è¿˜æ˜¯é€‰æ‹©è°ƒç”¨ngx_http_access_inet6æ¥å¤„ç†ipv6ã€‚
 static ngx_int_t ngx_http_access_handler(ngx_http_request_t *r);
 static ngx_int_t ngx_http_access_inet(ngx_http_request_t *r,
     ngx_http_access_loc_conf_t *alcf, in_addr_t addr);
@@ -56,8 +56,8 @@ static void *ngx_http_access_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_access_merge_loc_conf(ngx_conf_t *cf,
     void *parent, void *child);
 
-//¸Ãº¯Êı±»¹ÒÔÚµ½ÁËNGX_HTTP_ACCESS_PHASE½×¶ÎµÄhandlerÉÏ
-//Òò´ËÆäµ÷ÓÃÊ±»úÔÚNGX_HTTP_CONTENT_PHASEÖ®Ç°
+//è¯¥å‡½æ•°è¢«æŒ‚åœ¨åˆ°äº†NGX_HTTP_ACCESS_PHASEé˜¶æ®µçš„handlerä¸Š
+//å› æ­¤å…¶è°ƒç”¨æ—¶æœºåœ¨NGX_HTTP_CONTENT_PHASEä¹‹å‰
 static ngx_int_t ngx_http_access_init(ngx_conf_t *cf);
 
 

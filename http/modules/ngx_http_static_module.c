@@ -5,9 +5,9 @@
  */
 
 /*
- * ±¾Ä£¿éµÄ×÷ÓÃÊÇ£º
- * 1.¶ÁÈ¡´ÅÅÌÉÏµÄ¾²Ì¬ÎÄ¼ş¡£
- * 2.°Ñ¶ÁÈ¡µ½µÄ¾²Ì¬ÎÄ¼ş×÷Îª²úÉúµÄÊä³ö¡£
+ * æœ¬æ¨¡å—çš„ä½œç”¨æ˜¯ï¼š
+ * 1.è¯»å–ç£ç›˜ä¸Šçš„é™æ€æ–‡ä»¶ã€‚
+ * 2.æŠŠè¯»å–åˆ°çš„é™æ€æ–‡ä»¶ä½œä¸ºäº§ç”Ÿçš„è¾“å‡ºã€‚
  */
 #include <ngx_config.h>
 #include <ngx_core.h>
@@ -48,7 +48,8 @@ ngx_module_t  ngx_http_static_module = {
     NGX_MODULE_V1_PADDING
 };
 
-//ºËĞÄ´¦ÀíÂß¼­ngx_http_static_handlerº¯Êı¡£¸Ãº¯Êı´ó¸ÅÕ¼ÁËÕâ¸öÄ£¿é´úÂëÁ¿µÄ°Ù·ÖÖ®°Ë¾ÅÊ®¡£
+//æ ¸å¿ƒå¤„ç†é€»è¾‘ngx_http_static_handlerå‡½æ•°ã€‚è¯¥å‡½æ•°å¤§æ¦‚å äº†è¿™ä¸ªæ¨¡å—ä»£ç é‡çš„ç™¾åˆ†ä¹‹å…«ä¹åã€‚
+//[p]ngx_http_static_moduleæ¨¡å—çš„å¤„ç†å‡½æ•°ï¼Œæ£€æŸ¥URIçš„æœ‰æ•ˆæ€§ï¼Œæ˜ å°„URIåˆ°ç£ç›˜è·¯å¾„ï¼Œå†è®¿é—®æ–‡ä»¶ï¼Œæœ€åè°ƒç”¨ngx_http_output_filterï¼ŒæŠŠæ–‡ä»¶å†…å®¹äº¤ç»™è¿‡æ»¤é“¾è¡¨å¤„ç†
 static ngx_int_t
 ngx_http_static_handler(ngx_http_request_t *r)
 {
@@ -63,14 +64,14 @@ ngx_http_static_handler(ngx_http_request_t *r)
     ngx_open_file_info_t       of;
     ngx_http_core_loc_conf_t  *clcf;
 	
-	//¼ì²é¿Í»§¶ËÇëÇóµÄÀàĞÍ(r->method)Èç¹ûÇëÇóÀàĞÍ²»ÊÇGET¡¢HEAD¡¢POSTÔò¾Ü¾ø¿Í»§¶Ë·¢ÆğµÄÇëÇó¡£
-	//·ñÔò£¬¼ÌĞø´¦Àí¡£
+	//æ£€æŸ¥å®¢æˆ·ç«¯è¯·æ±‚çš„ç±»å‹(r->method)å¦‚æœè¯·æ±‚ç±»å‹ä¸æ˜¯GETã€HEADã€POSTåˆ™æ‹’ç»å®¢æˆ·ç«¯å‘èµ·çš„è¯·æ±‚ã€‚
+	//å¦åˆ™ï¼Œç»§ç»­å¤„ç†ã€‚
     if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD|NGX_HTTP_POST))) {
         return NGX_HTTP_NOT_ALLOWED;
     }
 	
-	//ÅĞ¶ÏÇëÇóµÄuriµÄ½áÎ²×Ö·ûÊÇ²»ÊÇĞ±¸Ü'/'£»
-	//Èç¹ûÊÇ£¬ËµÃ÷ÇóÇé²»ÊÇÒ»¸öÎÄ¼ş£¬¸øºóĞøµÄhandler´¦Àí¡£
+	//åˆ¤æ–­è¯·æ±‚çš„uriçš„ç»“å°¾å­—ç¬¦æ˜¯ä¸æ˜¯æ–œæ '/'ï¼›
+	//å¦‚æœæ˜¯ï¼Œè¯´æ˜æ±‚æƒ…ä¸æ˜¯ä¸€ä¸ªæ–‡ä»¶ï¼Œç»™åç»­çš„handlerå¤„ç†ã€‚
     if (r->uri.data[r->uri.len - 1] == '/') {
         return NGX_DECLINED;
     }
@@ -82,8 +83,8 @@ ngx_http_static_handler(ngx_http_request_t *r)
      * so we do not need to reserve memory for '/' for possible redirect
      */
 	
-	//ngx_http_map_uri_to_pahtº¯ÊıµÄ×÷ÓÃÊÇ°ÑÇëÇóµÄhttpĞ­ÒéµÄÂ·¾¶×ª»¯ÎªÎÄ¼şÏµÍ³µÄÂ·¾¶
-	//È»ºó¸ù¾İ×ª»¯À´µÄ¾ßÌåÂ·¾¶£¬È¥´ò¿ªÎÄ¼ş
+	//ngx_http_map_uri_to_pahtå‡½æ•°çš„ä½œç”¨æ˜¯æŠŠè¯·æ±‚çš„httpåè®®çš„è·¯å¾„è½¬åŒ–ä¸ºæ–‡ä»¶ç³»ç»Ÿçš„è·¯å¾„
+	//ç„¶åæ ¹æ®è½¬åŒ–æ¥çš„å…·ä½“è·¯å¾„ï¼Œå»æ‰“å¼€æ–‡ä»¶
     last = ngx_http_map_uri_to_path(r, &path, &root, 0);
     if (last == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -105,10 +106,10 @@ ngx_http_static_handler(ngx_http_request_t *r)
     of.errors = clcf->open_file_cache_errors;
     of.events = clcf->open_file_cache_events;
 	
-	//¸ù¾İÏà¹ØÅäÖÃÏî£¬¶ÔÎÄ¼ş×öÁ½ÖÖ¼ì²é
-	//1.Èç¹ûÇóÇéµÄÎÄ¼şÊÇÒ»¸ösymbol link£¬¸ù¾İÅäÖÃÊÇ·ñÓ¦Ğí·ûºÅÁ¬½Ó£¬²»Ó¦ĞíÔò·µ»Ø´íÎó¡£
-	//2.Èç¹ûÇëÇóµÄÊÇÒ»¸öÄ¿Â¼Ãû³Æ£¬ÔòÒ²·µ»Ø´íÎó¡£
-	//¼ì²éÃ»ÎÊÌâµÄ»°£¬¾Í¶ÁÈ¡ÎÄ¼ş£¬·µ»ØÄÚÈİ¸øÒ»ÏÂ¸öfilter.
+	//æ ¹æ®ç›¸å…³é…ç½®é¡¹ï¼Œå¯¹æ–‡ä»¶åšä¸¤ç§æ£€æŸ¥
+	//1.å¦‚æœæ±‚æƒ…çš„æ–‡ä»¶æ˜¯ä¸€ä¸ªsymbol linkï¼Œæ ¹æ®é…ç½®æ˜¯å¦åº”è®¸ç¬¦å·è¿æ¥ï¼Œä¸åº”è®¸åˆ™è¿”å›é”™è¯¯ã€‚
+	//2.å¦‚æœè¯·æ±‚çš„æ˜¯ä¸€ä¸ªç›®å½•åç§°ï¼Œåˆ™ä¹Ÿè¿”å›é”™è¯¯ã€‚
+	//æ£€æŸ¥æ²¡é—®é¢˜çš„è¯ï¼Œå°±è¯»å–æ–‡ä»¶ï¼Œè¿”å›å†…å®¹ç»™ä¸€ä¸‹ä¸ªfilter.
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
         != NGX_OK)
     {
@@ -269,10 +270,10 @@ ngx_http_static_handler(ngx_http_request_t *r)
     out.buf = b;
     out.next = NULL;
 
-    return ngx_http_output_filter(r, &out);
+    return ngx_http_output_filter(r, &out); //[p]å°†æ–‡ä»¶å†…å®¹äº¤ç»™è¿‡æ»¤é“¾è¡¨è¿›è¡Œå¤„ç†è¾“å‡º
 }
 
-//½âÎöÍêÅäÖÃÏîºóµ÷ÓÃ£¬½ö½öÊÇ°Ñhandler¹ÒÔØµ½NGX_HTTP_CONTENT_PHASE´¦Àí½×¶Î
+//è§£æå®Œé…ç½®é¡¹åè°ƒç”¨ï¼Œä»…ä»…æ˜¯æŠŠhandleræŒ‚è½½åˆ°NGX_HTTP_CONTENT_PHASEå¤„ç†é˜¶æ®µ
 static ngx_int_t
 ngx_http_static_init(ngx_conf_t *cf)
 {
@@ -286,7 +287,7 @@ ngx_http_static_init(ngx_conf_t *cf)
         return NGX_ERROR;
     }
 
-    *h = ngx_http_static_handler;
+    *h = ngx_http_static_handler;//[p]æ·»åŠ æ•°ç»„å…ƒç´ ,æŒ‚è½½è¿™ä¸ªhandleråˆ°NGX_HTTP_CONTENT_PHASEå¤„ç†é˜¶æ®µ
 
     return NGX_OK;
 }
