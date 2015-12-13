@@ -9,6 +9,7 @@ nginx-comment
 5. **update：2015-11-3  注释nginx http request phase**
 6. **update: 2015-11-17 注释http框架相关**
 7. **update: 2015-11-18 注释http upstream subrequest**
+8. **update: 2015-12-13 转换GBK到UTF-8编码**
 
 ##参考
 1. **《nginx高性能web服务器详解》**
